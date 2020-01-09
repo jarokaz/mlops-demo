@@ -1,1 +1,2 @@
-# mlops-demo
+# MLOps on GCP demo
+
