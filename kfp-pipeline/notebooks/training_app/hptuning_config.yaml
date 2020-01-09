@@ -1,0 +1,20 @@
+
+trainingInput:
+  hyperparameters:
+    goal: MAXIMIZE
+    maxTrials: 6
+    maxParallelTrials: 3
+    hyperparameterMetricTag: accuracy
+    enableTrialEarlyStopping: TRUE 
+    params:
+    - parameterName: max_iter
+      type: DISCRETE
+      discreteValues: [
+          200,
+          500
+          ]
+    - parameterName: alpha
+      type: DOUBLE
+      minValue:  0.00001
+      maxValue:  0.001
+      scaleType: UNIT_LINEAR_SCALE
