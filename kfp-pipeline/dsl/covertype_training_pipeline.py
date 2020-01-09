@@ -46,21 +46,21 @@ HYPERTUNE_SETTINGS = '''
 {
     "hyperparameters":  {
         "goal": "MAXIMIZE",
-        "maxTrials": 6,
-        "maxParallelTrials": 3,
+        "maxTrials": 4,
+        "maxParallelTrials": 2,
         "hyperparameterMetricTag": "accuracy",
         "enableTrialEarlyStopping": True,
         "params": [
             {
                 "parameterName": "max_iter",
                 "type": "DISCRETE",
-                "discreteValues": [500, 1000]
+                "discreteValues": [400, 600]
             },
             {
                 "parameterName": "alpha",
                 "type": "DOUBLE",
-                "minValue": 0.0001,
-                "maxValue": 0.001,
+                "minValue": 0.0005,
+                "maxValue": 0.005,
                 "scaleType": "UNIT_LINEAR_SCALE"
             }
         ]
