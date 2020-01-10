@@ -900,7 +900,7 @@
             }
 
             markdown = (
-                '**{metric_name.capitalize}:** {metric_value}  \n'
+                '**{metric_name}:** {metric_value}  \n'
             ).format(metric_name=metric_name.capitalize(), metric_value=round(metric_value, 6))
 
             metadata = {
@@ -915,17 +915,17 @@
 
             return (metric_name, metric_value, json.dumps(metrics), json.dumps(metadata))
 
-        def _serialize_str(str_value: str) -> str:
-            if not isinstance(str_value, str):
-                raise TypeError('Value "{}" has type "{}" instead of str.'.format(str(str_value), str(type(str_value))))
-            return str_value
-
         def _serialize_float(float_value: float) -> str:
             if isinstance(float_value, str):
                 return float_value
             if not isinstance(float_value, (float, int)):
                 raise TypeError('Value "{}" has type "{}" instead of float.'.format(str(float_value), str(type(float_value))))
             return str(float_value)
+
+        def _serialize_str(str_value: str) -> str:
+            if not isinstance(str_value, str):
+                raise TypeError('Value "{}" has type "{}" instead of str.'.format(str(str_value), str(type(str_value))))
+            return str_value
 
         import argparse
         _parser = argparse.ArgumentParser(prog='Evaluate model', description='')
@@ -990,13 +990,13 @@
     "outputs":
       "artifacts":
       - "name": |-
-          mlpipeline-ui-metadata
-        "path": |-
-          /tmp/outputs/mlpipeline_ui_metadata/data
-      - "name": |-
           mlpipeline-metrics
         "path": |-
           /tmp/outputs/mlpipeline_metrics/data
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /tmp/outputs/mlpipeline_ui_metadata/data
       - "name": |-
           evaluate-model-metric_name
         "path": |-

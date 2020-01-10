@@ -111,7 +111,7 @@ def evaluate_model(dataset_path:str, model_path:str, metric_name:str)->NamedTupl
     
     
     markdown = (
-        '**{metric_name.capitalize}:** {metric_value}  \n'
+        '**{metric_name}:** {metric_value}  \n'
     ).format(metric_name=metric_name.capitalize(), metric_value=round(metric_value, 6))
     
     metadata = {
