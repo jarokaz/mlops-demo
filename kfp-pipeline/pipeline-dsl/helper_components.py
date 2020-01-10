@@ -45,7 +45,7 @@ def retrieve_best_run(project_id:str, job_id:str)->NamedTuple('Outputs',
     max_iter = int(best_trial['hyperparameters']['max_iter'])
     
     markdown = (
-        '**Metric Value:** {metric_value}'
+        '**Validation Accuracy:** {metric_value}  \n'
         '**Alpha:**        {alpha}  \n'
         '**Max Iter:**     {max_iter}  \n'
     ).format(metric_value=round(metric_value, 6), alpha=round(alpha, 6), max_iter=max_iter)
@@ -66,7 +66,8 @@ def retrieve_best_run(project_id:str, job_id:str)->NamedTuple('Outputs',
 def evaluate_model(dataset_path:str, model_path:str, metric_name:str)->NamedTuple('Outputs',
                                                                        [('metric_name', str),
                                                                         ('metric_value', float),
-                                                                        ('mlpipeline_metrics', 'Metrics')]):
+                                                                        ('mlpipeline_metrics', 'Metrics'),
+                                                                        ('mlpipeline_ui_metadata', 'UI_metadata')]):
     #import joblib
     import pickle
     import json
@@ -108,5 +109,20 @@ def evaluate_model(dataset_path:str, model_path:str, metric_name:str)->NamedTupl
         }]
     }
     
-    return (metric_name, metric_value, json.dumps(metrics))
+    
+    markdown = (
+        '**{metric_name.capitalize}:** {metric_value}  \n'
+    ).format(metric_name=metric_name.capitalize(), metric_value=round(metric_value, 6))
+    
+    metadata = {
+        'outputs': [
+            {
+                'type': 'markdown',
+                'storage': 'inline',
+                'source': markdown
+            }
+        ]
+    }
+    
+    return (metric_name, metric_value, json.dumps(metrics), json.dumps(metadata))
 
