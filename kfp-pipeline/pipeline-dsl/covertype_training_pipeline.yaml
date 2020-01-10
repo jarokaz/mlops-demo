@@ -990,13 +990,13 @@
     "outputs":
       "artifacts":
       - "name": |-
-          mlpipeline-metrics
-        "path": |-
-          /tmp/outputs/mlpipeline_metrics/data
-      - "name": |-
           mlpipeline-ui-metadata
         "path": |-
           /tmp/outputs/mlpipeline_ui_metadata/data
+      - "name": |-
+          mlpipeline-metrics
+        "path": |-
+          /tmp/outputs/mlpipeline_metrics/data
       - "name": |-
           evaluate-model-metric_name
         "path": |-
