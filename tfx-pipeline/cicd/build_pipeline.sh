@@ -17,17 +17,18 @@
 # the pipelines and pipelines components 
 
 SUBSTITUTIONS=\
-_INVERTING_PROXY_HOST=1ff32660e53f5d89-dot-us-central1.notebooks.googleusercontent.com,\
-_TRAINER_IMAGE_NAME=trainer_image,\
-_BASE_IMAGE_NAME=base_image,\
-TAG_NAME=test,\
-_PIPELINE_FOLDER=kfp-pipeline/pipeline-dsl,\
-_PIPELINE_DSL=covertype_training_pipeline.py,\
-_PIPELINE_PACKAGE=covertype_training_pipeline.yaml,\
-_PIPELINE_NAME=covertype_classifier_training,\
-_RUNTIME_VERSION=1.14,\
-_PYTHON_VERSION=3.5,\
-_COMPONENT_URL_SEARCH_PREFIX=https://raw.githubusercontent.com/kubeflow/pipelines/0.1.36/components/gcp/
-
+_PIPELINE_NAME=onlinenews-predictor,\
+_TFX_IMAGE_NAME=lab-14-tfx-image,\
+_GCP_REGION=us-central1,\
+_ARTIFACT_STORE_URI=gs://mlops-workshop-dev-artifact-store,\
+_DATA_ROOT_URI=gs://mlops-workshop-dev-artifact-store/lab-datasets/online_news,\
+_PIPELINE_FOLDER=lab-14-tfx-caip-e2e/pipeline-dsl,\
+_PIPELINE_DSL=pipeline_dsl.py,\
+_KFP_INVERSE_PROXY_HOST=40a6ff3f4b68ff12-dot-us-central1.notebooks.googleusercontent.com,\
+_PYTHON_VERSION=3.7,\
+_RUNTIME_VERSION=1.15,\
+TAG_NAME=latest
 
 gcloud builds submit ../.. --config cloudbuild.yaml --substitutions $SUBSTITUTIONS
+
+
