@@ -16,8 +16,11 @@ from typing import NamedTuple
 def retrieve_best_run(project_id:str, job_id:str)->NamedTuple('Outputs',
                                                    [('metric_value', float),
                                                     ('alpha', float),
-                                                    ('max_iter', int)]):
+                                                    ('max_iter', int),
+                                                    ('mlpipeline_ui_metadata', 'UI_metadata')]):
 
+    import json
+    
     from googleapiclient import discovery
     from googleapiclient import errors
     
@@ -41,7 +44,23 @@ def retrieve_best_run(project_id:str, job_id:str)->NamedTuple('Outputs',
     alpha = float(best_trial['hyperparameters']['alpha'])
     max_iter = int(best_trial['hyperparameters']['max_iter'])
     
-    return(metric_value, alpha, max_iter)
+    markdown = (
+        '**Metric Value:** {metric_value}'
+        '**Alpha:**        {alpha}  \n'
+        '**Max Iter:**     {max_iter}  \n'
+    ).format(metric_value=round(metric_value, 6), alpha=round(alpha, 6), max_iter=max_iter)
+    
+    metadata = {
+        'outputs': [
+            {
+                'type': 'markdown',
+                'storage': 'inline',
+                'source': markdown
+            }
+        ]
+    }
+    
+    return(metric_value, alpha, max_iter, json.dumps(metadata))
 
 
 def evaluate_model(dataset_path:str, model_path:str, metric_name:str)->NamedTuple('Outputs',

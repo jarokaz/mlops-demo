@@ -1013,6 +1013,8 @@
         /tmp/outputs/alpha/data
       - |-
         /tmp/outputs/max_iter/data
+      - |-
+        /tmp/outputs/mlpipeline_ui_metadata/data
       "command":
       - |-
         python3
@@ -1026,7 +1028,10 @@
         def retrieve_best_run(project_id:str, job_id:str)->NamedTuple('Outputs',
                                                            [('metric_value', float),
                                                             ('alpha', float),
-                                                            ('max_iter', int)]):
+                                                            ('max_iter', int),
+                                                            ('mlpipeline_ui_metadata', 'UI_metadata')]):
+
+            import json
 
             from googleapiclient import discovery
             from googleapiclient import errors
@@ -1051,7 +1056,23 @@
             alpha = float(best_trial['hyperparameters']['alpha'])
             max_iter = int(best_trial['hyperparameters']['max_iter'])
 
-            return(metric_value, alpha, max_iter)
+            markdown = (
+                '**Metric Value:** {metric_value}'
+                '**Alpha:**        {alpha}  \n'
+                '**Max Iter:**     {max_iter}  \n'
+            ).format(metric_value=round(metric_value, 6), alpha=round(alpha, 6), max_iter=max_iter)
+
+            metadata = {
+                'outputs': [
+                    {
+                        'type': 'markdown',
+                        'storage': 'inline',
+                        'source': markdown
+                    }
+                ]
+            }
+
+            return(metric_value, alpha, max_iter, json.dumps(metadata))
 
         def _serialize_int(int_value: int) -> str:
             if isinstance(int_value, str):
@@ -1071,7 +1092,7 @@
         _parser = argparse.ArgumentParser(prog='Retrieve best run', description='')
         _parser.add_argument("--project-id", dest="project_id", type=str, required=True, default=argparse.SUPPRESS)
         _parser.add_argument("--job-id", dest="job_id", type=str, required=True, default=argparse.SUPPRESS)
-        _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=3)
+        _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=4)
         _parsed_args = vars(_parser.parse_args())
         _output_files = _parsed_args.pop("_output_paths", [])
 
@@ -1084,6 +1105,7 @@
             _serialize_float,
             _serialize_float,
             _serialize_int,
+            str,
 
         ]
 
@@ -1120,11 +1142,15 @@
     "metadata":
       "annotations":
         "pipelines.kubeflow.org/component_spec": |-
-          {"inputs": [{"name": "project_id", "type": "String"}, {"name": "job_id", "type": "String"}], "name": "Retrieve best run", "outputs": [{"name": "metric_value", "type": "Float"}, {"name": "alpha", "type": "Float"}, {"name": "max_iter", "type": "Integer"}]}
+          {"inputs": [{"name": "project_id", "type": "String"}, {"name": "job_id", "type": "String"}], "name": "Retrieve best run", "outputs": [{"name": "metric_value", "type": "Float"}, {"name": "alpha", "type": "Float"}, {"name": "max_iter", "type": "Integer"}, {"name": "mlpipeline_ui_metadata", "type": "UI_metadata"}]}
     "name": |-
       retrieve-best-run
     "outputs":
       "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /tmp/outputs/mlpipeline_ui_metadata/data
       - "name": |-
           retrieve-best-run-alpha
         "path": |-
