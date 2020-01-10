@@ -1,0 +1,192 @@
+"apiVersion": |-
+  argoproj.io/v1alpha1
+"kind": |-
+  Workflow
+"metadata":
+  "annotations":
+    "pipelines.kubeflow.org/pipeline_spec": |-
+      {"description": "Test pipeline", "inputs": [{"default": "0.0005", "name": "alpha"}, {"default": "100", "name": "max_iter"}], "name": "Test pipeline"}
+  "generateName": |-
+    test-pipeline-
+"spec":
+  "arguments":
+    "parameters":
+    - "name": |-
+        alpha
+      "value": |-
+        0.0005
+    - "name": |-
+        max_iter
+      "value": |-
+        100
+  "entrypoint": |-
+    test-pipeline
+  "serviceAccountName": |-
+    pipeline-runner
+  "templates":
+  - "container":
+      "args":
+      - |-
+        --alpha
+      - |-
+        {{inputs.parameters.alpha}}
+      - |-
+        --max-iter
+      - |-
+        {{inputs.parameters.max_iter}}
+      - |-
+        ----output-paths
+      - |-
+        /tmp/outputs/alpha/data
+      - |-
+        /tmp/outputs/max_iter/data
+      - |-
+        /tmp/outputs/mlpipeline_ui_metadata/data
+      "command":
+      - |-
+        python3
+      - |-
+        -u
+      - |-
+        -c
+      - |
+        from typing import NamedTuple
+
+        def retrieve_best_run(alpha:float, max_iter:int)->NamedTuple('Outputs',
+                                                           [('alpha', float),
+                                                            ('max_iter', int),
+                                                            ('mlpipeline_ui_metadata', 'UI_metadata')]):
+
+            import json
+
+            markdown = (
+                '**Alpha:**      {alpha}  \n'
+                '**Max Iter:**   {max_iter}  \n'
+            ).format(alpha=round(alpha, 5), max_iter=max_iter)
+
+            metadata = {
+                'outputs': [
+                    {
+                        'type': 'markdown',
+                        'storage': 'inline',
+                        'source': markdown
+                    }
+                ]
+            }
+
+            return (alpha, max_iter, json.dumps(metadata))
+
+        def _serialize_int(int_value: int) -> str:
+            if isinstance(int_value, str):
+                return int_value
+            if not isinstance(int_value, int):
+                raise TypeError('Value "{}" has type "{}" instead of int.'.format(str(int_value), str(type(int_value))))
+            return str(int_value)
+
+        def _serialize_float(float_value: float) -> str:
+            if isinstance(float_value, str):
+                return float_value
+            if not isinstance(float_value, (float, int)):
+                raise TypeError('Value "{}" has type "{}" instead of float.'.format(str(float_value), str(type(float_value))))
+            return str(float_value)
+
+        import argparse
+        _parser = argparse.ArgumentParser(prog='Retrieve best run', description='')
+        _parser.add_argument("--alpha", dest="alpha", type=float, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("--max-iter", dest="max_iter", type=int, required=True, default=argparse.SUPPRESS)
+        _parser.add_argument("----output-paths", dest="_output_paths", type=str, nargs=3)
+        _parsed_args = vars(_parser.parse_args())
+        _output_files = _parsed_args.pop("_output_paths", [])
+
+        _outputs = retrieve_best_run(**_parsed_args)
+
+        if not hasattr(_outputs, '__getitem__') or isinstance(_outputs, str):
+            _outputs = [_outputs]
+
+        _output_serializers = [
+            _serialize_float,
+            _serialize_int,
+            str,
+
+        ]
+
+        import os
+        for idx, output_file in enumerate(_output_files):
+            try:
+                os.makedirs(os.path.dirname(output_file))
+            except OSError:
+                pass
+            with open(output_file, 'w') as f:
+                f.write(_output_serializers[idx](_outputs[idx]))
+      "env":
+      - "name": |-
+          GOOGLE_APPLICATION_CREDENTIALS
+        "value": |-
+          /secret/gcp-credentials/user-gcp-sa.json
+      - "name": |-
+          CLOUDSDK_AUTH_CREDENTIAL_FILE_OVERRIDE
+        "value": |-
+          /secret/gcp-credentials/user-gcp-sa.json
+      "image": |-
+        gcr.io/deeplearning-platform-release/base-cpu
+      "volumeMounts":
+      - "mountPath": |-
+          /secret/gcp-credentials
+        "name": |-
+          gcp-credentials-user-gcp-sa
+    "inputs":
+      "parameters":
+      - "name": |-
+          alpha
+      - "name": |-
+          max_iter
+    "metadata":
+      "annotations":
+        "pipelines.kubeflow.org/component_spec": |-
+          {"inputs": [{"name": "alpha", "type": "Float"}, {"name": "max_iter", "type": "Integer"}], "name": "Retrieve best run", "outputs": [{"name": "alpha", "type": "Float"}, {"name": "max_iter", "type": "Integer"}, {"name": "mlpipeline_ui_metadata", "type": "UI_metadata"}]}
+    "name": |-
+      retrieve-best-run
+    "outputs":
+      "artifacts":
+      - "name": |-
+          mlpipeline-ui-metadata
+        "path": |-
+          /tmp/outputs/mlpipeline_ui_metadata/data
+      - "name": |-
+          retrieve-best-run-alpha
+        "path": |-
+          /tmp/outputs/alpha/data
+      - "name": |-
+          retrieve-best-run-max_iter
+        "path": |-
+          /tmp/outputs/max_iter/data
+    "volumes":
+    - "name": |-
+        gcp-credentials-user-gcp-sa
+      "secret":
+        "secretName": |-
+          user-gcp-sa
+  - "dag":
+      "tasks":
+      - "arguments":
+          "parameters":
+          - "name": |-
+              alpha
+            "value": |-
+              {{inputs.parameters.alpha}}
+          - "name": |-
+              max_iter
+            "value": |-
+              {{inputs.parameters.max_iter}}
+        "name": |-
+          retrieve-best-run
+        "template": |-
+          retrieve-best-run
+    "inputs":
+      "parameters":
+      - "name": |-
+          alpha
+      - "name": |-
+          max_iter
+    "name": |-
+      test-pipeline
